@@ -74,7 +74,9 @@ function createDino() {
     moveY: 0,
     width: game.image.dino.width,
     height: game.image.dino.height,
-    image: game.image.dino
+    image: game.image.dino,
+    jumpCount: 0,   // これ追加：今何回ジャンプしたか
+    maxJump: 2      // これ追加：最大ジャンプ回数（2段ジャンプ）
   }
 }
 
@@ -103,24 +105,35 @@ function createBird() {
 }
 
 document.onkeydown = function (e) {
-  if (e.key === ' ' && game.dino.moveY === 0) {
-    game.dino.moveY = -41;
+  // スペースキーでジャンプ
+  if (e.key === ' ') {
+    // まだ2回までならジャンプ可能
+    if (game.dino.jumpCount < game.dino.maxJump) {
+      // ジャンプ距離を半分くらいにするので -41 → -20 くらいに
+      game.dino.moveY = -20;
+      game.dino.jumpCount += 1;
+    }
   }
-  if(e.key === 'Enter' && game.isGameOver === true) {
-      init();
+
+  // Enterでリトライ
+  if (e.key === 'Enter' && game.isGameOver === true) {
+    init();
   }
 }
 
 function moveDino() {
   game.dino.y += game.dino.moveY;
+
   if (game.dino.y >= canvas.height - game.dino.height / 2) {
+    // 着地
     game.dino.y = canvas.height - game.dino.height / 2;
     game.dino.moveY = 0;
+    game.dino.jumpCount = 0;  // ← 着地したのでジャンプ回数リセット
   } else {
+    // 重力
     game.dino.moveY += 3;
   }
 }
-
 function moveEnemys() {
   for (const enemy of game.enemys) {
     enemy.x += enemy.moveX;
